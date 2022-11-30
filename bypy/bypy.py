@@ -2028,27 +2028,7 @@ try to create a file at PCS by combining slices, having MD5s specified
 			+ shlex.split(self.__downloader_args) \
 			+ ['-o', localfile, full_url]
 
-		tries = self.__retry
-		subret = 0
-		i = 0
-		while True:
-			self.pd("call: {}".format(cmd))
-			subret = subprocess.call(cmd)
-			self.pd("aria2c exited with status: {}".format(subret))
-			if subret == 0:
-				return const.ENoError
-			i += 1
-			if i < tries:
-				# algo changed: delay more after each failure
-				delay = const.RetryDelayInSec * i
-				perr("Waiting {} seconds before retrying...".format(delay))
-				time.sleep(delay)
-				perr("Request Try #{} / {}".format(i + 1, tries))
-			else:
-				perr("Maximum number ({}) of tries failed.".format(tries))
-				if self.__quit_when_fail:
-					sys.exit(const.EMaxRetry)
-				return const.EMaxRetry
+		print('\n' + ' '.join(cmd) + '\n')
 
 	# requirement: self.__remote_json is already gotten
 	def __downchunks(self, rfile, start):
@@ -2179,10 +2159,7 @@ try to create a file at PCS by combining slices, having MD5s specified
 				perr("Fail to make directory '{}'".format(ldir))
 				return result
 
-		if self.__downloader[:5] == const.DownloaderAria2:
-			result = self.__down_aria2c(rfile, localfile)
-		else:
-			result = self.__downchunks(rfile, offset)
+		result = self.__down_aria2c(rfile, localfile)
 
 		if result == const.ENoError:
 			self.__remove_remote_on_success(remotefile)
